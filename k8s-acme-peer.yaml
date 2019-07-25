@@ -34,6 +34,8 @@ spec:
           - name: CORE_PEER_ADDRESS
           # value: acme-peer-clusterip:30751
             value: localhost:30751
+          - name: CORE_PEER_CHAINCODELISTENADDRESS
+            value: localhost:37052
         volumeMounts:
         - name: acme-peer-ledger
           mountPath: /var/ledger
