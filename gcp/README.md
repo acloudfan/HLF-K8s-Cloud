@@ -1,0 +1,2 @@
+Assets specific to GCP
+======================
