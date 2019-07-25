@@ -1,0 +1,92 @@
+# YAML for launching the orderer
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: acme-orderer
+  labels:
+    app: acme-orderer
+spec:
+  serviceName: orderer
+  # Single instance of the Orderer Pod is needed
+  replicas: 1
+  selector:
+    matchLabels:
+      app: acme-orderer
+  template:
+    metadata:
+      labels:
+        app: acme-orderer
+    spec:
+      containers:
+      - name: acme-orderer
+
+        # Image used
+        image: acloudfan/k8s-hlf-acme-orderer:1.0
+
+        # Uncomment the following during development/testing of the image
+        # imagePullPolicy: Always
+        env:
+          # Points to the orderer.yaml
+          - name: FABRIC_CFG_PATH
+            value: /var/hyperledger/config
+          # Level of logging
+          - name: FABRIC_LOGGING_SPEC
+            value: DEBUG
+        volumeMounts:
+        # This is pointing to the PVC
+        - name: orderer-ledger
+          mountPath: /var/ledger
+
+  volumeClaimTemplates:
+  - metadata: 
+      name: orderer-ledger
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: general
+      resources:
+        requests:
+          storage: 1Gi
+
+---
+# Expose the port 7050 as ClusterIP
+apiVersion: v1
+kind: Service
+metadata:
+  name: acme-orderer-clusterip
+
+spec:
+  # This defines which pods are going to be represented by this Service
+  # The service becomes a network endpoint for either other services
+  # or maybe external users to connect to (eg browser)
+  selector:
+    app: acme-orderer
+
+  ports:
+    - name: acme-orderer-clusterip
+      port: 30750
+
+  type: ClusterIP
+
+---
+# Expose the port 30750 as node port - NEEDED if you
+# are interested in connecting to the Pods from the Host
+# machine - keep in mind you would need the IP for the node
+# port service
+apiVersion: v1
+kind: Service
+metadata:
+  name: acme-orderer-nodeport
+
+spec:
+  # This defines which pods are going to be represented by this Service
+  # The service becomes a network endpoint for either other services
+  # or maybe external users to connect to (eg browser)
+  selector:
+    app: acme-orderer
+
+  ports:
+    - name: acme-orderer-nodeport
+      port: 30750
+      nodePort: 30750
+
+  type: NodePort
