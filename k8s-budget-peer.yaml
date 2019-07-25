@@ -33,7 +33,7 @@ spec:
             value: budget
           - name: CORE_PEER_ADDRESS
           # value: budget-peer-clusterip:30851
-            value: localhost:30851
+            value: 0.0.0.0:30851
         volumeMounts:
         - name: budget-peer-ledger
           mountPath: /var/ledger
